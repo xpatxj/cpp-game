@@ -9,10 +9,10 @@ class Character : public QGraphicsPixmapItem
 public:
     Character(QGraphicsItem *parent = 0);
 
-    void walk();
-    void run();
-    void jump();
-    void fightDragon();
+    void setHealth(int health) { this->health = health; }
+    void setStrength(int strength) { this->strength = strength; }
+    void setSpeed(int speed) { this->speed = speed; }
+
     void keyPressEvent(QKeyEvent *event);
 
 private:

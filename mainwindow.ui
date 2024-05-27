@@ -17,7 +17,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTextBrowser" name="textBrowser">
+   <widget class="QTextBrowser" name="dialogi">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -33,7 +33,7 @@
      </font>
     </property>
     <property name="cursor" stdset="0">
-     <cursorShape>PointingHandCursor</cursorShape>
+     <cursorShape>ArrowCursor</cursorShape>
     </property>
     <property name="mouseTracking">
      <bool>true</bool>
@@ -97,20 +97,96 @@
     <property name="geometry">
      <rect>
       <x>830</x>
-      <y>330</y>
+      <y>10</y>
       <width>80</width>
       <height>80</height>
      </rect>
     </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-image: url(:/images/images/ekwipunek.png)</string>
+    </property>
     <property name="text">
-     <string>Ekwipunek</string>
+     <string/>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="xp">
+    <property name="geometry">
+     <rect>
+      <x>750</x>
+      <y>10</y>
+      <width>71</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="html">
+     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;XP: &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="zycie">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>10</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="html">
+     <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Życie:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="opcja1">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>340</y>
+      <width>83</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Opcja 1</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="opcja2">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>380</y>
+      <width>83</width>
+      <height>29</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Opcja 2</string>
     </property>
    </widget>
    <zorder>tlo</zorder>
-   <zorder>textBrowser</zorder>
+   <zorder>dialogi</zorder>
    <zorder>start</zorder>
    <zorder>dalej</zorder>
    <zorder>ekwipunek</zorder>
+   <zorder>xp</zorder>
+   <zorder>zycie</zorder>
+   <zorder>opcja1</zorder>
+   <zorder>opcja2</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -139,7 +215,11 @@
  <tabstops>
   <tabstop>tlo</tabstop>
   <tabstop>start</tabstop>
-  <tabstop>textBrowser</tabstop>
+  <tabstop>dialogi</tabstop>
+  <tabstop>opcja2</tabstop>
+  <tabstop>opcja1</tabstop>
+  <tabstop>zycie</tabstop>
+  <tabstop>xp</tabstop>
   <tabstop>ekwipunek</tabstop>
   <tabstop>dalej</tabstop>
  </tabstops>

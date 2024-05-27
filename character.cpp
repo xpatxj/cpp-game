@@ -9,11 +9,6 @@ Character::Character(QGraphicsItem *parent) : QGraphicsPixmapItem(parent)
     health = 100;
     strength = 50;
     speed = 10;
-
-    QPixmap pixmap(":/images/images/postac.png");
-    pixmap = pixmap.scaled(100, 100, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    setPixmap(pixmap);
-
 }
 
 void Character::keyPressEvent(QKeyEvent *event) {
@@ -38,17 +33,3 @@ void Character::keyPressEvent(QKeyEvent *event) {
     }
 }
 
-void Character::run()
-{
-    // Kod do biegania
-}
-
-void Character::jump()
-{
-    // Kod do skakania
-}
-
-void Character::fightDragon()
-{
-    // Kod do walki ze smokiem
-}

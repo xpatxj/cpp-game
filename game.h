@@ -1,11 +1,9 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <QMainWindow>
-#include <QObject>
-#include <QWidget>
+#include <QObject> // Dodajemy nagłówek QObject
 
-class Game
+class Game : public QObject // Dziedziczymy po QObject
 {
     Q_OBJECT
 public:

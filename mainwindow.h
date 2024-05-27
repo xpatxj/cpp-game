@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 #include <QGraphicsScene>
+#include "character.h"
 
 #include <QMainWindow>
 
@@ -18,14 +19,29 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    Character* spawnCharacter(const QString& imagePath, int x, int y, int health, int strength, int speed);
+
 public slots:
-    void displaySecondText();
-    void onStartClicked();
+    void firstDialogue();
+    void continueDisplayingText();
+    void changeBackground(const QString& sceneName);
 
 private:
     Ui::MainWindow *ui;
     void saveGame();
     MainWindow *mainWindow;
     QGraphicsScene *scene;
+    QGraphicsPixmapItem *scena;
+    Character *main_character;
+    int counter;
+    QTimer *collisionTimer;
+    bool czyKoliduje;
+
+private slots:
+    void firstScene();
+    void secondScene();
+    void ThirdScene();
+    void FourthScene();
+    void FifthScene();
 };
 #endif // MAINWINDOW_H
