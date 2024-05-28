@@ -12,7 +12,7 @@ public:
     void setHealth(int health) { this->health = health; }
     void setStrength(int strength) { this->strength = strength; }
     void setSpeed(int speed) { this->speed = speed; }
-    void keyPressEvent(QKeyEvent *event);
+    // void keyPressEvent(QKeyEvent *event);
     bool czyParasol;
     int health;
     int strength;

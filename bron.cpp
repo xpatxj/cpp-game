@@ -1,6 +1,16 @@
 #include "bron.h"
 
-Bron::Bron(qreal x, qreal y, QGraphicsItem *parent) : QGraphicsPixmapItem(parent), xPosition(x), yPosition(y)
+Bron::Bron(const QString& nazwa, int moc)
+    : nazwa(nazwa), moc(moc)
 {
-    setPos(xPosition, yPosition); // Ustawienie pozycji broni
+}
+
+QString Bron::getNazwa() const
+{
+    return nazwa;
+}
+
+int Bron::getMoc() const
+{
+    return moc;
 }

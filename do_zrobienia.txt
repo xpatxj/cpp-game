@@ -1,0 +1,10 @@
+zapis
+odczyt
+wyjscie z gry
+trzecia scena
+czwarta scena
+piąta scena
+dialog z bossem
+dialog z synem bossa
+dialog z npc
+poprawienie czasu gry

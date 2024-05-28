@@ -1,17 +1,18 @@
 #ifndef BRON_H
 #define BRON_H
 
-#include <QGraphicsPixmapItem>
-#include <QObject>
+#include <QString>
 
-class Bron : public QGraphicsPixmapItem
+class Bron
 {
-private:
-    qreal xPosition; // Pozycja x broni
-    qreal yPosition; // Pozycja y broni
-
 public:
-    Bron(qreal x, qreal y, QGraphicsItem *parent = nullptr);
+    explicit Bron(const QString& nazwa, int moc);
+    QString getNazwa() const;
+    int getMoc() const;
+
+private:
+    QString nazwa;
+    int moc;
 };
 
 #endif // BRON_H
