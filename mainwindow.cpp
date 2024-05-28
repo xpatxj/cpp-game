@@ -6,6 +6,7 @@
 #include <QGraphicsPixmapItem>
 #include <QDebug>
 #include <QTimer>
+#include <QKeyEvent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -70,7 +71,7 @@ void MainWindow::secondScene()
     int randomX = rand() % (720 - 300 + 1) + 300;
     int randomY = rand() % (350 - 200 + 1) + 200;
 
-    Character *zielony_smok = spawnCharacter(":/images/images/green_dragon2.png", 720, 290, 100, 50, 30);
+    Character *zielony_smok = spawnCharacter(":/images/images/green_dragon2.png", 720, 290, 100, 1, 10);
     zielony_smok->hide();
 
     Character *npcw = spawnCharacter(":/images/images/npcw.png", randomX, randomY, 0, 0, 0);
@@ -93,36 +94,40 @@ void MainWindow::secondScene()
                 ui->opcja1->show();
                 ui->opcja2->show();
                 ui->dialogi->append("W: Ten smok może zaatakować cię kwiatami!");
-                ui->dialogi->append("Kliknij P, aby użyć parasola. Parasol działa tylko 10 sekund.");
-                dziennik.push_back("Parasol działa tylko 10 sekund");
                 ui->opcja1->setText("Powiedz: Może dogadamy się pokojowo?");
                 ui->opcja2->setText("Atakuj!");
                 connect(ui->opcja1, &QPushButton::clicked, this, [=]() {
                     ui->opcja1->hide();
                     ui->opcja2->hide();
+
                 });
                 connect(ui->opcja2, &QPushButton::clicked, this, [=]() {
                     ui->opcja1->hide();
                     ui->opcja2->hide();
                     ui->dialogi->append("Atakujesz smoka!");
                     ui->dialogi->append("Rzucasz w niego wodną bombą!");
-                    QGraphicsPixmapItem *wodnaBomb = new QGraphicsPixmapItem(QPixmap(":/images/images/wodnabomba.png"));
-                    wodnaBomb->setPos(zielony_smok->x() - 20, zielony_smok->y() + 20);
-                    scene->addItem(wodnaBomb);
+                    QGraphicsPixmapItem *wodnaBomba = new QGraphicsPixmapItem(QPixmap(":/images/images/wodnabomba.png"));
+                    wodnaBomba->setPos(zielony_smok->x() - 20, zielony_smok->y() + 20);
+                    scene->addItem(wodnaBomba);
+                    wodnaBomba->show();
 
-                    QTimer::singleShot(1500, [=]() {
-                        scene->removeItem(wodnaBomb);
+                    QTimer::singleShot(4000, [=]() {
+                        scene->removeItem(wodnaBomba);
                         ui->dialogi->append("Kliknij 'K', aby uzyc bomby.");
                         dziennik.push_back("Kliknij 'K', aby uzyc bomby.");
                         QTimer *smokTimer = new QTimer(this);
                         connect(smokTimer, &QTimer::timeout, this, [=]() {
                             ruszajSmokiem(zielony_smok, main_character);
 
-                            // Sprawdź kolizję między smokiem a graczem
                             if (main_character->collidesWithItem(zielony_smok)) {
-                                // Jeśli jest kolizja, zmniejsz punkty życia gracza o 5
-                                zmienPunktyZycia(-1);
+                                int sila = zielony_smok->strength;
+                                zmienPunktyZycia(-sila);
                             }
+
+                            if (event->key() == Qt::Key_P) {
+
+                            }
+
                         });
                         smokTimer->start(100);
 
@@ -334,7 +339,7 @@ void MainWindow::ruszajSmokiem(Character *smok, Character *gracz) {
     dx /= dlugosc;
     dy /= dlugosc;
 
-    qreal predkoscSmoka = 10.0;
+    qreal predkoscSmoka = smok->speed;
 
     smok->setPos(smok->x() + predkoscSmoka * dx, smok->y() + predkoscSmoka * dy);
 }
@@ -352,8 +357,27 @@ void MainWindow::changeBackground(const QString& sceneName) {
 }
 
 void MainWindow::zmienPunktyZycia(int punkty) {
-    zycie += punkty;
-    ui->zycie->setText("Życie: " + QString::number(zycie));
+    if (zycie > 0) {
+        zycie += punkty;
+        ui->zycie->setText("Życie: " + QString::number(zycie));
+    }
+    else {
+        // Usuń wszystkie elementy ze sceny
+        ui->dialogi->hide();
+        ui->ekw_but->hide();
+        ui->ekw_list->hide();
+        ui->dziennik->hide();
+        ui->zycie->hide();
+        ui->dalej->hide();
+        ui->xp->hide();
+        ui->opcja1->hide();
+        ui->opcja2->hide();
+        ui->dzien_list->hide();
+        ui->dialogi->hide();
+
+        // Zmień tło na "koniec"
+        changeBackground("koniec");
+    }
 }
 
 void MainWindow::zmienXP(int punkty) {

@@ -14,11 +14,12 @@ public:
     void setSpeed(int speed) { this->speed = speed; }
     void keyPressEvent(QKeyEvent *event);
     bool czyParasol;
-
-private:
     int health;
     int strength;
     int speed;
+
+private:
+
 };
 
 #endif // CHARACTER_H
