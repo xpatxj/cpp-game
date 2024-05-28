@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "character.h"
+#include "bron.h"
 #include "./ui_mainwindow.h"
 #include <QSettings>
 #include <QGraphicsScene>
@@ -18,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->ekw_list->hide();
     ui->dziennik->hide();
     ui->zycie->hide();
+    ui->zycie_wroga->hide();
     ui->dalej->hide();
     ui->xp->hide();
     ui->opcja1->hide();
@@ -26,7 +28,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     xp = 0;
     zycie = 100;
+    zycieWroga = 0;
     zmienPunktyZycia(0);
+
     zmienXP(0);
 
     scene = new QGraphicsScene(this);
@@ -38,6 +42,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->start, &QPushButton::clicked, this, &MainWindow::firstScene);
     connect(ui->ekw_but, &QPushButton::clicked, this, &MainWindow::showEquipment);
+    connect(this, &MainWindow::itemSelected, this, &MainWindow::handleItemSelected);
     connect(ui->dziennik, &QPushButton::clicked, this, &MainWindow::showDziennik);
 
     counter = 1;
@@ -54,7 +59,7 @@ void MainWindow::firstScene()
 
     firstDialogue();
 
-    main_character = spawnCharacter(":/images/images/postac.png", 0, 340, 100, 100, 10);
+    main_character = spawnCharacter(":/images/images/postac.png", 0, 340, 100, 50, 10);
 
     connect(ui->dalej, &QPushButton::clicked, this, &MainWindow::secondScene);
 }
@@ -71,7 +76,7 @@ void MainWindow::secondScene()
     int randomX = rand() % (720 - 300 + 1) + 300;
     int randomY = rand() % (350 - 200 + 1) + 200;
 
-    Character *zielony_smok = spawnCharacter(":/images/images/green_dragon2.png", 720, 290, 100, 1, 10);
+    Character *zielony_smok = spawnCharacter(":/images/images/green_dragon2.png", 720, 290, 50, 1, 10);
     zielony_smok->hide();
 
     Character *npcw = spawnCharacter(":/images/images/npcw.png", randomX, randomY, 0, 0, 0);
@@ -86,46 +91,45 @@ void MainWindow::secondScene()
         if (main_character->collidesWithItem(npcw)) {
             secondDialogue();
             timer->stop();
-            QTimer::singleShot(6000, [=]() {
+            QTimer::singleShot(600, [=]() {
                 zielony_smok->show();
             });
-            QTimer::singleShot(8000, [=]() {
-                ui->dialogi->append("Kolejny strażak...");
+            QTimer::singleShot(800, [=]() {
+                ui->dialogi->append("Smok: Kolejny strażak...");
                 ui->opcja1->show();
                 ui->opcja2->show();
-                ui->dialogi->append("W: Ten smok może zaatakować cię kwiatami!");
                 ui->opcja1->setText("Powiedz: Może dogadamy się pokojowo?");
-                ui->opcja2->setText("Atakuj!");
+                ui->opcja2->setText("Atakuj wodną bombą!");
                 connect(ui->opcja1, &QPushButton::clicked, this, [=]() {
                     ui->opcja1->hide();
                     ui->opcja2->hide();
+                    ui->dialogi->append("Smoki nie potrafią mówić.");
+                    dziennik.push_back("Smoki nie potrafią mówić.");
 
                 });
+                // bitwa
                 connect(ui->opcja2, &QPushButton::clicked, this, [=]() {
+                    ui->zycie_wroga->show();
+                    zmienPunktyWroga(zielony_smok->health);
                     ui->opcja1->hide();
-                    ui->opcja2->hide();
+                    // ui->opcja2->hide();
+
                     ui->dialogi->append("Atakujesz smoka!");
                     ui->dialogi->append("Rzucasz w niego wodną bombą!");
-                    QGraphicsPixmapItem *wodnaBomba = new QGraphicsPixmapItem(QPixmap(":/images/images/wodnabomba.png"));
-                    wodnaBomba->setPos(zielony_smok->x() - 20, zielony_smok->y() + 20);
-                    scene->addItem(wodnaBomba);
-                    wodnaBomba->show();
+                    int s = main_character->strength;
+                    zmienPunktyWroga(-s);
 
                     QTimer::singleShot(4000, [=]() {
-                        scene->removeItem(wodnaBomba);
-                        ui->dialogi->append("Kliknij 'K', aby uzyc bomby.");
-                        dziennik.push_back("Kliknij 'K', aby uzyc bomby.");
                         QTimer *smokTimer = new QTimer(this);
                         connect(smokTimer, &QTimer::timeout, this, [=]() {
                             ruszajSmokiem(zielony_smok, main_character);
 
-                            if (main_character->collidesWithItem(zielony_smok)) {
+                            if (main_character->collidesWithItem(zielony_smok) && zycieWroga>0) {
                                 int sila = zielony_smok->strength;
                                 zmienPunktyZycia(-sila);
-                            }
-
-                            if (event->key() == Qt::Key_P) {
-
+                            } else if (zycieWroga<=0) {
+                                scene->removeItem(zielony_smok);
+                                ui->dialogi->append("Pokonałeś smoka!");
                             }
 
                         });
@@ -154,6 +158,152 @@ void MainWindow::FourthScene() {
 
 void MainWindow::FifthScene() {
 
+}
+
+void MainWindow::PassEquipment(const QString& rzecz) {
+    ekwipunek.push_back(rzecz);
+}
+
+// void MainWindow::uzycieParasola() {
+//     character->setPixmap(QPixmap(imagePath));
+// }
+
+void MainWindow::showEquipment() {
+    if(ui->ekw_list->isVisible()) {
+        ui->ekw_list->hide();
+    } else {
+        ui->ekw_list->clear();
+
+        if (!ekwipunek.empty()) {
+            for(const QString& item : ekwipunek) {
+                ui->ekw_list->addItem(item);
+            }
+        } else {
+            ui->ekw_list->addItem("PUSTO");
+        }
+        ui->ekw_list->show();
+    }
+
+    // Po wybraniu przedmiotu z listy "ekwipunek"
+    connect(ui->ekw_list, &QListWidget::itemClicked, this, [=](QListWidgetItem *item){
+        emit itemSelected(item->text());
+    });
+}
+
+void MainWindow::handleItemSelected(const QString& item) {
+    wybranyPrzedmiot = item;
+    ui->dialogi->append("Wybrano przedmiot: " + wybranyPrzedmiot);
+}
+
+
+void MainWindow::showDziennik() {
+    if(ui->dzien_list->isVisible()) {
+        ui->dzien_list->hide();
+    } else {
+        ui->dzien_list->clear();
+
+        if (!dziennik.empty()) {
+            for(const QString& item : dziennik) {
+                ui->dzien_list->addItem(item);
+            }
+        } else {
+            ui->dzien_list->addItem("PUSTO");
+        }
+        ui->dzien_list->show();
+    }
+}
+
+Character* MainWindow::spawnCharacter(const QString& imagePath, int x, int y, int health, int strength, int speed)
+{
+    Character *character = new Character();
+    scene->addItem(character);
+    character->setPixmap(QPixmap(imagePath));
+    character->setPos(x, y);
+
+    character->setHealth(health);
+    character->setStrength(strength);
+    character->setSpeed(speed);
+
+    // Debugowanie: Wyświetlenie współrzędnych x i y postaci oraz jej stanu widoczności
+    qDebug() << "Character position (x, y):" << character->x() << "," << character->y();
+    qDebug() << "Character visibility:" << character->isVisible();
+
+    return character;
+}
+
+Bron* MainWindow::SpawnBron(Character *character, const QString& imagePath, char status) {
+    Bron *bron = new Bron(character->x(), character->y());
+    scene->addItem(bron);
+    bron->setPos(character->x(), character->y());
+    bron->setPixmap(QPixmap(imagePath));
+    bron->show();
+    // Debugowanie: Wyświetlenie współrzędnych x i y postaci oraz jej stanu widoczności
+    qDebug() << "Bron position (x, y):" << character->x() << "," << character->y();
+    qDebug() << "Bron visibility:" << character->isVisible();
+
+    return bron;
+}
+
+bool czyMożnaAtakować(int xGracza, int yGracza, int xSmoka, int ySmoka) {
+    return (qAbs(xGracza - xSmoka) >= 30 || qAbs(yGracza - ySmoka) >= 30);
+}
+
+void MainWindow::ruszajSmokiem(Character *smok, Character *gracz) {
+    qreal dx = gracz->x() - smok->x();
+    qreal dy = gracz->y() - smok->y();
+    qreal dlugosc = sqrt(dx*dx + dy*dy);
+    dx /= dlugosc;
+    dy /= dlugosc;
+
+    qreal predkoscSmoka = smok->speed;
+
+    smok->setPos(smok->x() + predkoscSmoka * dx, smok->y() + predkoscSmoka * dy);
+}
+
+
+void MainWindow::changeBackground(const QString& sceneName) {
+    QString imagePath = ":/images/images/" + sceneName + ".jpg";
+    QPixmap pixmap(imagePath);
+    if (pixmap.isNull()) {
+        qDebug() << "Failed to load image";
+    }
+    else {
+        scene->addPixmap(pixmap);
+        scene->setSceneRect(0, 0, ui->tlo->width()-10, ui->tlo->height()-10);
+    }
+}
+
+void MainWindow::zmienPunktyZycia(int punkty) {
+    if (zycie > 0) {
+        zycie += punkty;
+        ui->zycie->setText("Życie: " + QString::number(zycie));
+    }
+    else {
+        // Usuń wszystkie elementy ze sceny
+        ui->dialogi->hide();
+        ui->ekw_but->hide();
+        ui->ekw_list->hide();
+        ui->dziennik->hide();
+        ui->zycie->hide();
+        ui->dalej->hide();
+        ui->xp->hide();
+        ui->opcja1->hide();
+        ui->opcja2->hide();
+        ui->dzien_list->hide();
+        ui->dialogi->hide();
+
+        // Zmień tło na "koniec"
+        changeBackground("koniec");
+    }
+}
+
+void MainWindow::zmienPunktyWroga(int punkty) {
+    zycieWroga += punkty;
+    ui->zycie_wroga->setText("Życie wroga: " + QString::number(zycieWroga));
+}
+void MainWindow::zmienXP(int punkty) {
+    xp += punkty;
+    ui->xp->setText("XP: " + QString::number(xp));
 }
 
 void MainWindow::firstDialogue() {
@@ -218,38 +368,38 @@ void MainWindow::firstDialogue() {
 void MainWindow::secondDialogue() {
 
     QStringList texts = {
-        "Wieśniaczka: Nareszcie jesteś!",
-        "Ty: Kim jesteś? Nic ci nie jest?",
-        "W: Smoki, one znowu tu były!",
-        "Ty: Jesteś jedyną osobą, która przeżyła?",
-        "W: Tak... T-to... AAAAAAA!!",
-        "Ty: Co się dzieje? Co się dzieje?",
-        "W: Szybko, masz tutaj parasol!"};
+                         "Wieśniaczka: Nareszcie jesteś!",
+                         "Ty: Kim jesteś? Nic ci nie jest?",
+                         "W: Smoki, one znowu tu były!",
+                         "Ty: Jesteś jedyną osobą, która przeżyła?",
+                         "W: Tak... T-to... AAAAAAA!!",
+                         "Ty: Co się dzieje? Co się dzieje?",
+                         "W: Szybko, masz tutaj parasol!"};
 
     switch (counter) {
     case 1:
         ui->dialogi->append(texts[counter - 1]);
-        QTimer::singleShot(1000, this, &MainWindow::secondDialogue);
+        QTimer::singleShot(100, this, &MainWindow::secondDialogue);
         break;
     case 2:
         ui->dialogi->append(texts[counter - 1]);
-        QTimer::singleShot(1000, this, &MainWindow::secondDialogue);
+        QTimer::singleShot(100, this, &MainWindow::secondDialogue);
         break;
     case 3:
         ui->dialogi->append(texts[counter - 1]);
-        QTimer::singleShot(1000, this, &MainWindow::secondDialogue);
+        QTimer::singleShot(100, this, &MainWindow::secondDialogue);
         break;
     case 4:
         ui->dialogi->append(texts[counter - 1]);
-        QTimer::singleShot(1000, this, &MainWindow::secondDialogue);
+        QTimer::singleShot(100, this, &MainWindow::secondDialogue);
         break;
     case 5:
         ui->dialogi->append(texts[counter - 1]);
-        QTimer::singleShot(1000, this, &MainWindow::secondDialogue);
+        QTimer::singleShot(100, this, &MainWindow::secondDialogue);
         break;
     case 6:
         ui->dialogi->append(texts[counter - 1]);
-        QTimer::singleShot(1000, this, &MainWindow::secondDialogue);
+        QTimer::singleShot(100, this, &MainWindow::secondDialogue);
         break;
     case 7:
         ui->dialogi->append(texts[counter - 1]);
@@ -266,123 +416,6 @@ void MainWindow::secondDialogue() {
     }
 
     counter++;
-}
-
-// void MainWindow::thirdDialogue() {
-
-// }
-
-void MainWindow::PassEquipment(const QString& rzecz) {
-    ekwipunek.push_back(rzecz);
-}
-
-// void MainWindow::uzycieParasola() {
-//     character->setPixmap(QPixmap(imagePath));
-// }
-
-void MainWindow::showEquipment() {
-    if(ui->ekw_list->isVisible()) {
-        ui->ekw_list->hide();
-    } else {
-        ui->ekw_list->clear();
-
-        if (!ekwipunek.empty()) {
-            for(const QString& item : ekwipunek) {
-                ui->ekw_list->addItem(item);
-            }
-        } else {
-            ui->ekw_list->addItem("PUSTO");
-        }
-        ui->ekw_list->show();
-    }
-}
-
-void MainWindow::showDziennik() {
-    if(ui->dzien_list->isVisible()) {
-        ui->dzien_list->hide();
-    } else {
-        ui->dzien_list->clear();
-
-        if (!dziennik.empty()) {
-            for(const QString& item : dziennik) {
-                ui->dzien_list->addItem(item);
-            }
-        } else {
-            ui->dzien_list->addItem("PUSTO");
-        }
-        ui->dzien_list->show();
-    }
-}
-
-Character* MainWindow::spawnCharacter(const QString& imagePath, int x, int y, int health, int strength, int speed)
-{
-    Character *character = new Character();
-    scene->addItem(character);
-    character->setPixmap(QPixmap(imagePath));
-    character->setPos(x, y);
-
-    character->setHealth(health);
-    character->setStrength(strength);
-    character->setSpeed(speed);
-
-    return character;
-}
-
-bool czyMożnaAtakować(int xGracza, int yGracza, int xSmoka, int ySmoka) {
-    return (qAbs(xGracza - xSmoka) >= 30 || qAbs(yGracza - ySmoka) >= 30);
-}
-
-void MainWindow::ruszajSmokiem(Character *smok, Character *gracz) {
-    qreal dx = gracz->x() - smok->x();
-    qreal dy = gracz->y() - smok->y();
-    qreal dlugosc = sqrt(dx*dx + dy*dy);
-    dx /= dlugosc;
-    dy /= dlugosc;
-
-    qreal predkoscSmoka = smok->speed;
-
-    smok->setPos(smok->x() + predkoscSmoka * dx, smok->y() + predkoscSmoka * dy);
-}
-
-void MainWindow::changeBackground(const QString& sceneName) {
-    QString imagePath = ":/images/images/" + sceneName + ".jpg";
-    QPixmap pixmap(imagePath);
-    if (pixmap.isNull()) {
-        qDebug() << "Failed to load image";
-    }
-    else {
-        scene->addPixmap(pixmap);
-        scene->setSceneRect(0, 0, ui->tlo->width()-10, ui->tlo->height()-10);
-    }
-}
-
-void MainWindow::zmienPunktyZycia(int punkty) {
-    if (zycie > 0) {
-        zycie += punkty;
-        ui->zycie->setText("Życie: " + QString::number(zycie));
-    }
-    else {
-        // Usuń wszystkie elementy ze sceny
-        ui->dialogi->hide();
-        ui->ekw_but->hide();
-        ui->ekw_list->hide();
-        ui->dziennik->hide();
-        ui->zycie->hide();
-        ui->dalej->hide();
-        ui->xp->hide();
-        ui->opcja1->hide();
-        ui->opcja2->hide();
-        ui->dzien_list->hide();
-        ui->dialogi->hide();
-
-        // Zmień tło na "koniec"
-        changeBackground("koniec");
-    }
-}
-
-void MainWindow::zmienXP(int punkty) {
-    xp += punkty;
-    ui->xp->setText("XP: " + QString::number(xp));
 }
 
 MainWindow::~MainWindow()

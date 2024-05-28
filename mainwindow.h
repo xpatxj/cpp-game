@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 #include <QGraphicsScene>
 #include "character.h"
+#include "bron.h"
 
 #include <QMainWindow>
 
@@ -20,8 +21,15 @@ public:
     ~MainWindow();
 
     Character* spawnCharacter(const QString& imagePath, int x, int y, int health, int strength, int speed);
+    Bron* SpawnBron(Character *character, const QString& imagePath, char status);
     std::vector<QString> ekwipunek;
     std::vector<QString> dziennik;
+    QKeyEvent *event;
+    // void keyPressEvent(QKeyEvent *event);
+    void handleItemSelected(const QString& item);
+
+signals:
+    void itemSelected(const QString& item);
 
 public slots:
     void firstDialogue();
@@ -44,8 +52,10 @@ private:
     bool czyKoliduje;
     int xp;
     int zycie;
+    int zycieWroga;
     bool czySmok;
     bool czyMożnaAtakować(int xGracza, int yGracza, int xSmoka, int ySmoka);
+    QString wybranyPrzedmiot;
 
 private slots:
     void firstScene();
@@ -54,6 +64,7 @@ private slots:
     void FourthScene();
     void FifthScene();
     void zmienPunktyZycia(int punkty);
+    void zmienPunktyWroga(int punkty);
     void zmienXP(int punkty);
 };
 #endif // MAINWINDOW_H
