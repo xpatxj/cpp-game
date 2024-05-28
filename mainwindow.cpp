@@ -13,12 +13,20 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     ui->dialogi->hide();
-    ui->ekwipunek->hide();
+    ui->ekw_but->hide();
+    ui->ekw_list->hide();
+    ui->dziennik->hide();
     ui->zycie->hide();
     ui->dalej->hide();
     ui->xp->hide();
     ui->opcja1->hide();
     ui->opcja2->hide();
+    ui->dzien_list->hide();
+
+    xp = 0;
+    zycie = 100;
+    zmienPunktyZycia(0);
+    zmienXP(0);
 
     scene = new QGraphicsScene(this);
     scena = new QGraphicsPixmapItem();
@@ -28,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
     changeBackground("start");
 
     connect(ui->start, &QPushButton::clicked, this, &MainWindow::firstScene);
+    connect(ui->ekw_but, &QPushButton::clicked, this, &MainWindow::showEquipment);
+    connect(ui->dziennik, &QPushButton::clicked, this, &MainWindow::showDziennik);
 
     counter = 1;
 }
@@ -50,45 +60,82 @@ void MainWindow::firstScene()
 
 void MainWindow::secondScene()
 {
+    PassEquipment("Kula wodna");
     ui->dalej->hide();
     ui->dialogi->clear();
-    ui->ekwipunek->show();
+    ui->ekw_but->show();
+    ui->dziennik->show();
     changeBackground("tlo2");
+
+    int randomX = rand() % (720 - 300 + 1) + 300;
+    int randomY = rand() % (350 - 200 + 1) + 200;
 
     Character *zielony_smok = spawnCharacter(":/images/images/green_dragon2.png", 720, 290, 100, 50, 30);
     zielony_smok->hide();
-    Character *npcw = spawnCharacter(":/images/images/npcw.png", 600, 200, 0, 0, 0);
+
+    Character *npcw = spawnCharacter(":/images/images/npcw.png", randomX, randomY, 0, 0, 0);
     scene->addItem(main_character);
     main_character->setFlag(QGraphicsItem::ItemIsFocusable);
     main_character->setFocus();
-    ui->dialogi->append("Podejdż do postaci. Możesz poruszać się strzałkami.");
+    ui->dialogi->append("Podejdż do Wieśniaczki. Możesz poruszać się strzałkami.");
+    ui->dialogi->append("W lewym górnym roku znajdziesz Dziennik Aktywności oraz Ekwipunek. Pomogą ci one zebrać wszystkie informacje, których się dowiedziałeś.");
 
-    czyKoliduje = false;
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, [=]() {
         if (main_character->collidesWithItem(npcw)) {
-            czyKoliduje = true;
-            ui->dialogi->append("Wieśniaczka: Nareszcie jesteś!!!");
-            QTimer::singleShot(2000, this, [=]() {
-            ui->dialogi->append("Ty: Co się stało?");
-                QTimer::singleShot(2000, this, [=]() {
-                    ui->dialogi->append("W: hahaha nie");
+            secondDialogue();
+            timer->stop();
+            QTimer::singleShot(6000, [=]() {
+                zielony_smok->show();
+            });
+            QTimer::singleShot(8000, [=]() {
+                ui->dialogi->append("Kolejny strażak...");
+                ui->opcja1->show();
+                ui->opcja2->show();
+                ui->dialogi->append("W: Ten smok może zaatakować cię kwiatami!");
+                ui->dialogi->append("Kliknij P, aby użyć parasola. Parasol działa tylko 10 sekund.");
+                dziennik.push_back("Parasol działa tylko 10 sekund");
+                ui->opcja1->setText("Powiedz: Może dogadamy się pokojowo?");
+                ui->opcja2->setText("Atakuj!");
+                connect(ui->opcja1, &QPushButton::clicked, this, [=]() {
+                    ui->opcja1->hide();
+                    ui->opcja2->hide();
+                });
+                connect(ui->opcja2, &QPushButton::clicked, this, [=]() {
+                    ui->opcja1->hide();
+                    ui->opcja2->hide();
+                    ui->dialogi->append("Atakujesz smoka!");
+                    ui->dialogi->append("Rzucasz w niego wodną bombą!");
+                    QGraphicsPixmapItem *wodnaBomb = new QGraphicsPixmapItem(QPixmap(":/images/images/wodnabomba.png"));
+                    wodnaBomb->setPos(zielony_smok->x() - 20, zielony_smok->y() + 20);
+                    scene->addItem(wodnaBomb);
+
+                    QTimer::singleShot(1500, [=]() {
+                        scene->removeItem(wodnaBomb);
+                        ui->dialogi->append("Kliknij 'K', aby uzyc bomby.");
+                        dziennik.push_back("Kliknij 'K', aby uzyc bomby.");
+                        QTimer *smokTimer = new QTimer(this);
+                        connect(smokTimer, &QTimer::timeout, this, [=]() {
+                            ruszajSmokiem(zielony_smok, main_character);
+
+                            // Sprawdź kolizję między smokiem a graczem
+                            if (main_character->collidesWithItem(zielony_smok)) {
+                                // Jeśli jest kolizja, zmniejsz punkty życia gracza o 5
+                                zmienPunktyZycia(-1);
+                            }
+                        });
+                        smokTimer->start(100);
+
+                    });
                 });
             });
 
-            timer->stop();
         } else {
-            czyKoliduje = false;
+
         }
 
     });
     timer->start(100);
-
-    // if (czyKoliduje == true) {
-    //     ui->dialogi->append("Wieśniaczka: Nareszcie jesteś!!!");
-    //     QTimer::singleShot(1000, this, &MainWindow::continueDisplayingText);
-    //     ui->dialogi->append("Ty: Co się stało?");
-    // }
 }
 
 
@@ -120,50 +167,148 @@ void MainWindow::firstDialogue() {
     switch (counter) {
     case 1:
         ui->dialogi->append(texts[counter - 1]);
-        QTimer::singleShot(100, this, &MainWindow::continueDisplayingText);
+        QTimer::singleShot(100, this, &MainWindow::firstDialogue);
         break;
     case 2:
         ui->dialogi->append(texts[counter - 1]);
-        QTimer::singleShot(100, this, &MainWindow::continueDisplayingText);
+        QTimer::singleShot(100, this, &MainWindow::firstDialogue);
         break;
     case 3:
         ui->dialogi->append(texts[counter - 1]);
-        QTimer::singleShot(100, this, &MainWindow::continueDisplayingText);
+        QTimer::singleShot(100, this, &MainWindow::firstDialogue);
         break;
     case 4:
         ui->dialogi->append(texts[counter - 1]);
-        QTimer::singleShot(100, this, &MainWindow::continueDisplayingText);
+        QTimer::singleShot(100, this, &MainWindow::firstDialogue);
         break;
     case 5:
         ui->dialogi->append(texts[counter - 1]);
-        QTimer::singleShot(100, this, &MainWindow::continueDisplayingText);
+        QTimer::singleShot(100, this, &MainWindow::firstDialogue);
         break;
     case 6:
         ui->dialogi->append(texts[counter - 1]);
-        QTimer::singleShot(100, this, &MainWindow::continueDisplayingText);
+        QTimer::singleShot(100, this, &MainWindow::firstDialogue);
         break;
     case 7:
         ui->dialogi->append(texts[counter - 1]);
-        QTimer::singleShot(100, this, &MainWindow::continueDisplayingText);
+        QTimer::singleShot(100, this, &MainWindow::firstDialogue);
         break;
     case 8:
         ui->dialogi->append(texts[counter - 1]);
-        QTimer::singleShot(100, this, &MainWindow::continueDisplayingText);
+        QTimer::singleShot(100, this, &MainWindow::firstDialogue);
         break;
     case 9:
         scene->removeItem(main_character);
         ui->dalej->show();
+        counter = 0;
         break;
     default:
+        counter = 0;
         break;
     }
 
     counter++;
 }
 
-void MainWidnow::secondDialogue() {
+void MainWindow::secondDialogue() {
 
+    QStringList texts = {
+        "Wieśniaczka: Nareszcie jesteś!",
+        "Ty: Kim jesteś? Nic ci nie jest?",
+        "W: Smoki, one znowu tu były!",
+        "Ty: Jesteś jedyną osobą, która przeżyła?",
+        "W: Tak... T-to... AAAAAAA!!",
+        "Ty: Co się dzieje? Co się dzieje?",
+        "W: Szybko, masz tutaj parasol!"};
+
+    switch (counter) {
+    case 1:
+        ui->dialogi->append(texts[counter - 1]);
+        QTimer::singleShot(1000, this, &MainWindow::secondDialogue);
+        break;
+    case 2:
+        ui->dialogi->append(texts[counter - 1]);
+        QTimer::singleShot(1000, this, &MainWindow::secondDialogue);
+        break;
+    case 3:
+        ui->dialogi->append(texts[counter - 1]);
+        QTimer::singleShot(1000, this, &MainWindow::secondDialogue);
+        break;
+    case 4:
+        ui->dialogi->append(texts[counter - 1]);
+        QTimer::singleShot(1000, this, &MainWindow::secondDialogue);
+        break;
+    case 5:
+        ui->dialogi->append(texts[counter - 1]);
+        QTimer::singleShot(1000, this, &MainWindow::secondDialogue);
+        break;
+    case 6:
+        ui->dialogi->append(texts[counter - 1]);
+        QTimer::singleShot(1000, this, &MainWindow::secondDialogue);
+        break;
+    case 7:
+        ui->dialogi->append(texts[counter - 1]);
+        PassEquipment("Parasol");
+        ui->dialogi->append("Zdobyłeś: " + ekwipunek.back().toUpper() + ". Zobacz swój ekwipunek");
+        QTimer::singleShot(100, this, &MainWindow::secondDialogue);
+        break;
+    case 8:
+        counter = 0;
+        break;
+    default:
+        counter = 0;
+        break;
+    }
+
+    counter++;
 }
+
+// void MainWindow::thirdDialogue() {
+
+// }
+
+void MainWindow::PassEquipment(const QString& rzecz) {
+    ekwipunek.push_back(rzecz);
+}
+
+// void MainWindow::uzycieParasola() {
+//     character->setPixmap(QPixmap(imagePath));
+// }
+
+void MainWindow::showEquipment() {
+    if(ui->ekw_list->isVisible()) {
+        ui->ekw_list->hide();
+    } else {
+        ui->ekw_list->clear();
+
+        if (!ekwipunek.empty()) {
+            for(const QString& item : ekwipunek) {
+                ui->ekw_list->addItem(item);
+            }
+        } else {
+            ui->ekw_list->addItem("PUSTO");
+        }
+        ui->ekw_list->show();
+    }
+}
+
+void MainWindow::showDziennik() {
+    if(ui->dzien_list->isVisible()) {
+        ui->dzien_list->hide();
+    } else {
+        ui->dzien_list->clear();
+
+        if (!dziennik.empty()) {
+            for(const QString& item : dziennik) {
+                ui->dzien_list->addItem(item);
+            }
+        } else {
+            ui->dzien_list->addItem("PUSTO");
+        }
+        ui->dzien_list->show();
+    }
+}
+
 Character* MainWindow::spawnCharacter(const QString& imagePath, int x, int y, int health, int strength, int speed)
 {
     Character *character = new Character();
@@ -178,6 +323,22 @@ Character* MainWindow::spawnCharacter(const QString& imagePath, int x, int y, in
     return character;
 }
 
+bool czyMożnaAtakować(int xGracza, int yGracza, int xSmoka, int ySmoka) {
+    return (qAbs(xGracza - xSmoka) >= 30 || qAbs(yGracza - ySmoka) >= 30);
+}
+
+void MainWindow::ruszajSmokiem(Character *smok, Character *gracz) {
+    qreal dx = gracz->x() - smok->x();
+    qreal dy = gracz->y() - smok->y();
+    qreal dlugosc = sqrt(dx*dx + dy*dy);
+    dx /= dlugosc;
+    dy /= dlugosc;
+
+    qreal predkoscSmoka = 10.0;
+
+    smok->setPos(smok->x() + predkoscSmoka * dx, smok->y() + predkoscSmoka * dy);
+}
+
 void MainWindow::changeBackground(const QString& sceneName) {
     QString imagePath = ":/images/images/" + sceneName + ".jpg";
     QPixmap pixmap(imagePath);
@@ -189,12 +350,18 @@ void MainWindow::changeBackground(const QString& sceneName) {
         scene->setSceneRect(0, 0, ui->tlo->width()-10, ui->tlo->height()-10);
     }
 }
-void MainWindow::continueDisplayingText() {
-    firstDialogue();
+
+void MainWindow::zmienPunktyZycia(int punkty) {
+    zycie += punkty;
+    ui->zycie->setText("Życie: " + QString::number(zycie));
+}
+
+void MainWindow::zmienXP(int punkty) {
+    xp += punkty;
+    ui->xp->setText("XP: " + QString::number(xp));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
-

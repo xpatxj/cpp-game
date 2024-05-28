@@ -12,12 +12,16 @@ SOURCES += \
     character.cpp \
     game.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    npc.cpp \
+    smok.cpp
 
 HEADERS += \
     character.h \
     game.h \
-    mainwindow.h
+    mainwindow.h \
+    npc.h \
+    smok.h
 
 FORMS += \
     mainwindow.ui \

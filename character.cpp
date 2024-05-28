@@ -3,6 +3,7 @@
 #include <QGraphicsItem>
 #include <QKeyEvent>
 #include <QGraphicsView>
+#include "mainwindow.h"
 
 Character::Character(QGraphicsItem *parent) : QGraphicsPixmapItem(parent)
 {
@@ -31,5 +32,10 @@ void Character::keyPressEvent(QKeyEvent *event) {
     else if (event->key() == Qt::Key_Space) {
         // Kod do ataku
     }
+    else if (event->key() == Qt::Key_P) {
+
+    }
+
+
 }
 
