@@ -51,6 +51,9 @@
       <height>581</height>
      </rect>
     </property>
+    <property name="focusPolicy">
+     <enum>Qt::StrongFocus</enum>
+    </property>
     <property name="autoFillBackground">
      <bool>true</bool>
     </property>

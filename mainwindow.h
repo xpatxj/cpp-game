@@ -34,6 +34,7 @@ signals:
 public slots:
     void firstDialogue();
     void secondDialogue();
+    void thirdDialogue();
     void changeBackground(const QString& sceneName);
     void PassEquipment(Bron *przedmiot);
     void showEquipment();
@@ -56,6 +57,7 @@ private:
     bool czySmok;
     bool czyMożnaAtakować(int xGracza, int yGracza, int xSmoka, int ySmoka);
     QString wybranyPrzedmiot;
+    int ileZabitych;
 
 private slots:
     void firstScene();

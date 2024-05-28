@@ -9,5 +9,10 @@
         <file>images/npcw.png</file>
         <file>images/koniec.jpg</file>
         <file>images/wodnabomba.png</file>
+        <file>images/tlo3.jpg</file>
+        <file>images/blue_dragon2.png</file>
+        <file>images/npcw1.png</file>
+        <file>images/npc2.png</file>
+        <file>images/npc3.png</file>
     </qresource>
 </RCC>

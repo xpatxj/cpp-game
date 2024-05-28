@@ -67,28 +67,32 @@ void MainWindow::firstScene()
     main_character->setStrength(50);
     main_character->setSpeed(10);
 
-
     connect(ui->dalej, &QPushButton::clicked, this, &MainWindow::secondScene);
 }
 
 void MainWindow::secondScene()
 {
+    // Dezaktywuj połączenie przycisku "dalej"
+    disconnect(ui->dalej, &QPushButton::clicked, this, &MainWindow::secondScene);
+
     ui->dalej->hide();
     ui->dialogi->clear();
     ui->ekw_but->show();
     ui->dziennik->show();
     changeBackground("tlo2");
+    connect(ui->dalej, &QPushButton::clicked, this, &MainWindow::ThirdScene);
 
     int randomX = rand() % (720 - 300 + 1) + 300;
     int randomY = rand() % (350 - 200 + 1) + 200;
 
     Character *zielony_smok = spawnCharacter(":/images/images/green_dragon2.png", 720, 290, 50, 10, 10);
     zielony_smok->hide();
-
     Character *npcw = spawnCharacter(":/images/images/npcw.png", randomX, randomY, 50, 0, 0);
+
     scene->addItem(main_character);
     main_character->setFlag(QGraphicsItem::ItemIsFocusable);
     main_character->setFocus();
+
     ui->dialogi->append("Podejdż do Wieśniaczki. Możesz poruszać się strzałkami.");
     ui->dialogi->append("Z każdym kolejnym poziomem zyskujesz również na szybkości.");
     dziennik.push_back("Z każdym kolejnym poziomem zyskujesz również na szybkości.");
@@ -112,8 +116,7 @@ void MainWindow::secondScene()
                 connect(ui->opcja1, &QPushButton::clicked, this, [=]() {
                     ui->opcja1->hide();
                     ui->opcja2->hide();
-                    ui->dialogi->append("Smoki nie potrafią mówić.");
-                    dziennik.push_back("Smoki nie potrafią mówić.");
+                    ui->dialogi->append("Ten smok nie potrafi mówić.");
 
                 });
                 // bitwa
@@ -133,7 +136,7 @@ void MainWindow::secondScene()
                     int s = bombaWodna->getMoc();
                     zmienPunktyWroga(-s);
 
-                    QTimer::singleShot(4002, [=]() {
+                    QTimer::singleShot(400, [=]() {
                         QTimer *smokTimer = new QTimer(this);
                         connect(smokTimer, &QTimer::timeout, this, [=]() {
                             ruszajSmokiem(zielony_smok, main_character);
@@ -147,6 +150,7 @@ void MainWindow::secondScene()
                                 if (npcwhealth < 0) {
                                     scene->removeItem(npcw);
                                 }
+
                             } else if (main_character->getCzyAtak()) {
                                 zmienPunktyWroga(-s);
                                 main_character->setCzyAtak(false);
@@ -155,36 +159,100 @@ void MainWindow::secondScene()
                                 ui->dialogi->append("Pokonałeś smoka, a do tego udało ci się uratować Wieśniaczkę! Dostajesz 300 XP.");
                                 zmienXP(300);
                                 smokTimer->stop();
+                                scene->removeItem(npcw);
+                                delete npcw;
+                                delete zielony_smok;
+                                ui->dalej->show();
                             } else if (zycieWroga<=0 && npcw->health<0) {
                                 scene->removeItem(zielony_smok);
                                 ui->dialogi->append("Pokonałeś smoka, ale nie udało ci się uratować wieśniaczki. Dostajesz 100 XP.");
                                 zmienXP(100);
+                                ileZabitych++;
                                 smokTimer->stop();
+                                delete npcw;
+                                delete zielony_smok;
                                 ui->dalej->show();
-                                connect(ui->dalej, &QPushButton::clicked, this, &MainWindow::thirdScene);
                             }
                         });
                         smokTimer->start(100);
-
                     });
                 });
             });
-
         }
-
     });
     timer->start(100);
 }
 
-// spotkanie innych strażaków, trzech NPC i walka z potężniejszym smokiem, który ma szybkość 20 i moc 50
+// spotkanie innych strażaków, trzech NPC i walka z potężniejszym smokiem, który ma szybkość 20 i moc 50, a NPC maja zycie 100
+// zyskujemy dwie nowe bronie od strazakow oraz jeden od npc
 void MainWindow::ThirdScene() {
+    ui->dalej->hide();
+    ui->dialogi->clear();
+    ui->ekw_but->show();
+    ui->dziennik->show();
+    ui->zycie_wroga->hide();
+    changeBackground("tlo3");
 
+    int randomX1 = rand() % 932;
+    int randomY1 = rand() % 261 + 80;
+    int randomX2 = rand() % 932;
+    int randomY2 = rand() % 261 + 80;
+    int randomX3 = rand() % 932;
+    int randomY3 = rand() % 261 + 80;
+
+
+    Character *niebieski_smok = spawnCharacter(":/images/images/blue_dragon2.png", 720, 290, 200, 50, 20);
+    niebieski_smok->hide();
+    Character *npcs1 = spawnCharacter(":/images/images/npc2.png", randomX1, randomY1, 100, 0, 0);
+    Character *npcs2 = spawnCharacter(":/images/images/npc3.png", randomX2, randomY2, 100, 0, 0);
+    Character *npcw2 = spawnCharacter(":/images/images/npcw1.png", randomX3, randomY3, 100, 0, 0);
+
+    scene->removeItem(main_character);
+    scene->addItem(main_character);
+    main_character->setFlag(QGraphicsItem::ItemIsFocusable);
+    main_character->setFocus();
+    main_character->setPos(0, 340);
+
+    ui->dialogi->append("Podejdż do każdej z postaci, aby dowiedzieć się czegoś nowego.");
+    QTimer *timer2 = new QTimer(this);
+    connect(timer2, &QTimer::timeout, this, [=]() {
+        if (main_character->collidesWithItem(npcs1) ) {
+            thirdDialogue();
+            timer2->stop();
+
+        }
+    });
+    timer2->start(100);
+
+    QTimer *timer3 = new QTimer(this);
+    connect(timer3, &QTimer::timeout, this, [=]() {
+        if (main_character->collidesWithItem(npcs2) ) {
+            thirdDialogue();
+            timer3->stop();
+
+        }
+    });
+    timer3->start(100);
+
+    QTimer *timer4 = new QTimer(this);
+    connect(timer4, &QTimer::timeout, this, [=]() {
+        if (main_character->collidesWithItem(npcw2) ) {
+            thirdDialogue();
+            timer4->stop();
+
+        }
+    });
+    timer4->start(100);
 }
 
+// z żółtym deszczem, mozemy tutaj uzyc parasolki i on bedzie calkiem trudny, ale nie najtrudniejszy, okaze sie dzieckiem bossa.
+// dostaniemy bron dzieki ktorej bedziemy mogli sie skopiowac trzy razy i te nasze male wersje rowniez beda mogly nam pomagac.
 void MainWindow::FourthScene() {
 
 }
-// final fight, jestesmy tylko my i boss. on moze rzucac w nas jednym z 5 broni, ktore zainicjujemy w tablicy. ma bardzo duzo zycia, ale my tez mamy duzo, bo zrobi nam sie x5 podczas walki z nim. gdy go pokonamy, okaze sie, ze jest to stachnik xd i go "odczarujemy", a on bedzie mogl wrocic do swiata normalnie i rowniez stanie sie strazakiem.
+// final fight, jestesmy tylko my i boss. on moze rzucac w nas jednym z 5 broni, ktore zainicjujemy w tablicy. ma bardzo duzo zycia,
+// ale my tez mamy duzo, bo zrobi nam sie x5 podczas walki z nim. gdy go pokonamy, okaze sie, ze jest to stachnik xd i go "odczarujemy",
+// a on bedzie mogl wrocic do swiata normalnie i rowniez stanie sie strazakiem.
 // wygrywamy, jesli uratowalismy wiecej niz polowe cywili oraz pokonalismy smoka,
 // przegrywamy, jesli uratowalismy mniej niz polowe cywili lub jesli nie pokonalismy smoka
 void MainWindow::FifthScene() {
@@ -216,12 +284,12 @@ void MainWindow::showEquipment() {
         }
         ui->ekw_list->show();
     }
+    // Usuń istniejące połączenia
+    disconnect(ui->ekw_list, &QListWidget::itemClicked, nullptr, nullptr);
 
-    // Po wybraniu przedmiotu z listy "ekwipunek"
     connect(ui->ekw_list, &QListWidget::itemClicked, this, [=](QListWidgetItem *item){
-        // Znajdź odpowiadający przedmiot w ekwipunku i wyświetl jego szczegóły
         for(Bron *przedmiot : ekwipunek) {
-            if(przedmiot->getNazwa() == item->text()) {
+            if (przedmiot->getNazwa() == item->text()) {
                 ui->dialogi->append("Nazwa: " + przedmiot->getNazwa());
                 ui->dialogi->append("Moc: " + QString::number(przedmiot->getMoc()));
                 break;
@@ -230,12 +298,10 @@ void MainWindow::showEquipment() {
     });
 }
 
-
 void MainWindow::handleItemSelected(const QString& item) {
     wybranyPrzedmiot = item;
     ui->dialogi->append("Wybrano przedmiot: " + wybranyPrzedmiot);
 }
-
 
 void MainWindow::showDziennik() {
     if(ui->dzien_list->isVisible()) {
@@ -276,8 +342,6 @@ Bron* MainWindow::SpawnBron(const QString& nazwa, int moc) {
     Bron *bron = new Bron(nazwa, moc); // Creating a new weapon object
     return bron;
 }
-
-
 
 bool czyMożnaAtakować(int xGracza, int yGracza, int xSmoka, int ySmoka) {
     return (qAbs(xGracza - xSmoka) >= 30 || qAbs(yGracza - ySmoka) >= 30);
@@ -448,6 +512,55 @@ void MainWindow::secondDialogue() {
         break;
     default:
         // counter = 0;
+        break;
+    }
+
+    counter++;
+}
+void MainWindow::thirdDialogue() {
+    Bron *gasnica = nullptr;
+
+    QStringList texts = {
+                         "Strażak1: O, ty z naszych!",
+                         "Ty: Widzę, że trochę się was tu zebrało.",
+                         "S1: Mamy problem. Musimy ugasić kolejnego smoka. Podpalił kolejne miasto.",
+                         "Ty: CO? Naprawdę?",
+                         "S1: Jest 300 rannych. Jeśli tak dalej pójdzie, wszyscy zginiemy!",
+                         "S1: Trzymaj się mnie, a na pewno zajdziesz daleko!",
+                         };
+
+    switch (counter) {
+    case 1:
+        ui->dialogi->append(texts[counter - 1]);
+        QTimer::singleShot(100, this, &MainWindow::thirdDialogue);
+        break;
+    case 2:
+        ui->dialogi->append(texts[counter - 1]);
+        QTimer::singleShot(100, this, &MainWindow::thirdDialogue);
+        break;
+    case 3:
+        ui->dialogi->append(texts[counter - 1]);
+        QTimer::singleShot(100, this, &MainWindow::thirdDialogue);
+        break;
+    case 4:
+        ui->dialogi->append(texts[counter - 1]);
+        QTimer::singleShot(100, this, &MainWindow::thirdDialogue);
+        break;
+    case 5:
+        ui->dialogi->append(texts[counter - 1]);
+        QTimer::singleShot(100, this, &MainWindow::thirdDialogue);
+        break;
+    case 6:
+        ui->dialogi->append(texts[counter - 1]);
+        QTimer::singleShot(100, this, &MainWindow::thirdDialogue);
+        break;
+    case 7:
+        counter = 0;
+        gasnica = SpawnBron("Gaśnica", 20);
+        PassEquipment(gasnica);
+        break;
+    default:
+        counter = 0;
         break;
     }
 
