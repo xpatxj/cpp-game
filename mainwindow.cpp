@@ -486,11 +486,6 @@ void MainWindow::showEquipment() {
     });
 }
 
-void MainWindow::handleItemSelected(const QString& item) {
-    // wybranyPrzedmiot = item;
-    // ui->dialogi->append("Wybrano przedmiot: " + wybranyPrzedmiot);
-}
-
 void MainWindow::showDziennik() {
     if(ui->dzien_list->isVisible()) {
         ui->dzien_list->hide();

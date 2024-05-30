@@ -8,3 +8,5 @@ dialog z bossem
 dialog z synem bossa
 dialog z npc
 poprawienie czasu gry
+poglebic troche fabule
+dodanie ze mozna zaczac gre od nowa
