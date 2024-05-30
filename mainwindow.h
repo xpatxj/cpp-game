@@ -56,8 +56,9 @@ private:
     int zycieWroga;
     bool czySmok;
     bool czyMożnaAtakować(int xGracza, int yGracza, int xSmoka, int ySmoka);
-    QString wybranyPrzedmiot;
+    Bron *wybranyPrzedmiot;
     int ileZabitych;
+    int czyWszystkiePostacie;
 
 private slots:
     void firstScene();
