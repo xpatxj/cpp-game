@@ -84,7 +84,7 @@ void MainWindow::secondScene()
     changeBackground("tlo2");
     connect(ui->dalej, &QPushButton::clicked, this, &MainWindow::ThirdScene);
 
-    int randomX = rand() % (720 - 300 + 1) + 300;
+    int randomX = rand() % (720 - 300 + 1) + 200;
     int randomY = rand() % (350 - 200 + 1) + 200;
 
     Character *zielony_smok = spawnCharacter(":/images/images/green_dragon2.png", 720, 290, 50, 10, 10);
@@ -115,17 +115,19 @@ void MainWindow::secondScene()
                 ui->opcja2->show();
                 ui->opcja1->setText("Powiedz: Może dogadamy się pokojowo?");
                 ui->opcja2->setText("Atakuj wodną bombą!");
+
                 connect(ui->opcja1, &QPushButton::clicked, this, [=]() {
                     ui->opcja1->hide();
-                    ui->opcja2->hide();
+                    // ui->opcja2->hide();
                     ui->dialogi->append("Ten smok nie potrafi mówić.");
 
                 });
                 // bitwa
                 connect(ui->opcja2, &QPushButton::clicked, this, [=]() {
-                    Bron *bombaWodna = SpawnBron("Bomba wodna", 10);
+                    Bron *bombaWodna = SpawnBron("Bomba wodna", 5);
                     PassEquipment(bombaWodna);
                     wybranyPrzedmiot = bombaWodna;
+
                     ui->zycie_wroga->show();
                     zmienPunktyWroga(zielony_smok->health);
                     ui->opcja1->hide();
@@ -142,7 +144,7 @@ void MainWindow::secondScene()
                     QTimer::singleShot(400, [=]() {
                         QTimer *smokTimer = new QTimer(this);
                         connect(smokTimer, &QTimer::timeout, this, [=]() {
-                            ruszajSmokiem(zielony_smok, main_character);
+                            ruszajPostacia(zielony_smok, main_character);
                             int silaWroga = zielony_smok->strength;
 
                             if (main_character->collidesWithItem(zielony_smok) && zycieWroga>0) {
@@ -161,6 +163,7 @@ void MainWindow::secondScene()
                                 scene->removeItem(zielony_smok);
                                 ui->dialogi->append("Pokonałeś Zielonego Smoka, a do tego udało ci się uratować Wieśniaczkę! Dostajesz 300 XP.");
                                 zmienXP(300);
+                                zmienPunktyZycia(100);
                                 smokTimer->stop();
                                 scene->removeItem(npcw);
                                 delete npcw;
@@ -169,7 +172,9 @@ void MainWindow::secondScene()
                             } else if (zycieWroga<=0 && npcw->health<0) {
                                 scene->removeItem(zielony_smok);
                                 ui->dialogi->append("Pokonałeś Zielonego Smoka, ale nie udało ci się uratować Wieśniaczki. Dostajesz 100 XP.");
+                                ui->dialogi->append("Pamiętaj, że to od tego, jak uratujesz miasto, będzie zależeć wynik gry.");
                                 zmienXP(100);
+                                zmienPunktyZycia(100);
                                 ileZabitych++;
                                 smokTimer->stop();
                                 delete npcw;
@@ -200,18 +205,19 @@ void MainWindow::ThirdScene() {
     ui->dziennik->show();
     ui->zycie_wroga->hide();
     changeBackground("tlo3");
+    connect(ui->dalej, &QPushButton::clicked, this, &MainWindow::FourthScene);
 
     int randomX1 = rand() % 800;
     int randomY1 = rand() % 260 + 80;
     int randomX2 = rand() % 800;
-    int randomY2 = rand() % 260 + 80;
+    int randomY2 = rand() % 260 + 23;
     int randomX3 = rand() % 800;
-    int randomY3 = rand() % 260 + 80;
+    int randomY3 = rand() % 260 + 54;
 
 
     Character *niebieski_smok = spawnCharacter(":/images/images/blue_dragon2.png", 720, 290, 200, 30, 10);
     niebieski_smok->hide();
-    Character *npcs1 = spawnCharacter(":/images/images/npc2.png", randomX1, randomY1, 100, 0, 0);
+    Character *npcs1 = spawnCharacter(":/images/images/npc3.png", randomX1, randomY1, 100, 5, 10);
     Character *npcw2 = spawnCharacter(":/images/images/npcw1.png", randomX2, randomY2, 100, 0, 0);
     Character *npcw3 = spawnCharacter(":/images/images/npcw2.png", randomX3, randomY3, 100, 0, 0);
 
@@ -257,7 +263,6 @@ void MainWindow::ThirdScene() {
     });
     timer4->start(100);
 
-    // Timer dla sprawdzenia, czy wszystkie postacie zostały sprawdzone
     QTimer *timer_wrog = new QTimer(this);
     connect(timer_wrog, &QTimer::timeout, this, [=]() {
         if (czyWszystkiePostacie == 3) {
@@ -267,7 +272,7 @@ void MainWindow::ThirdScene() {
             });
             QTimer::singleShot(800, [=]() {
                 ui->dialogi->append("M: To smok!");
-                ui->dialogi->append("Zrób wszystko, aby uratować ludność cywilną. Nie możesz dopuścić, aby smok zderzył się z mieszkańcem. Powodzenia");
+                ui->dialogi->append("Zrób wszystko, aby uratować ludność cywilną. Nie możesz dopuścić, aby smok zderzył się z mieszkańcami. Powodzenia");
                 ui->dialogi->append("Od teraz możesz wybierać bronie, którymi dysponujesz.");
 
                 ui->opcja1->show();
@@ -275,13 +280,91 @@ void MainWindow::ThirdScene() {
                 ui->opcja1->setText("Wykończcie smoka razem.");
                 ui->opcja2->setText("Pokonaj go sam.");
 
+                // opcja 1 - pokonanie z kolegą
                 connect(ui->opcja1, &QPushButton::clicked, this, [=]() {
+                    ui->dialogi->append("W zamian za bycie koleżeńskim, dostajesz nagrodę! 200 Punktów życia!");
+                    zmienPunktyZycia(200);
+
+                    silaBroni = wybranyPrzedmiot->getMoc();
                     ui->opcja1->hide();
                     ui->opcja2->hide();
-                    ui->dialogi->append("Chuj ci w dupe.");
+
+                    zycieWroga = 0;
+                    zmienPunktyWroga(niebieski_smok->health);
+                    ui->zycie_wroga->show();
+
+                    int silaWroga = niebieski_smok->strength;
+
+                    QTimer::singleShot(1000, [=]() {
+                        QTimer *smokTimer = new QTimer(this);
+                        connect(smokTimer, &QTimer::timeout, this, [=]() {
+                            silaBroni = wybranyPrzedmiot->getMoc();
+                            ruszajPostacia(niebieski_smok, main_character);
+                            ruszajPostacia(npcs1, niebieski_smok);
+
+                            if (main_character->collidesWithItem(niebieski_smok) && zycieWroga>0) {
+                                zmienPunktyZycia(-silaWroga);
+                            } else if (npcs1->collidesWithItem(niebieski_smok) && zycieWroga>0){
+                                zmienPunktyWroga(-5);
+                                npcs1->setPos(niebieski_smok->pos().x()-220, niebieski_smok->pos().y()-140);
+                            } else if (npcw2->collidesWithItem(niebieski_smok) && zycieWroga>0) {
+                                int npcw2health = npcw2->health;
+                                npcw2->setHealth(npcw2health-silaWroga);
+                                if (npcw2health < 0) {
+                                    scene->removeItem(npcw2);
+                                }
+                            } else if (main_character->getCzyAtak()) {
+                                zmienPunktyWroga(-silaBroni);
+                                main_character->setCzyAtak(false);
+                            } else if (zycieWroga<=0 && npcw2->health>0 && npcw3->health>0) {
+                                scene->removeItem(niebieski_smok);
+                                ui->dialogi->append("Pokonałeś Niebieskiego Smoka, a do tego udało ci się uratować mieszkańców! Dostajesz 500 XP.");
+                                zmienXP(500);
+                                zmienPunktyZycia(200);
+                                smokTimer->stop();
+                                scene->removeItem(npcw2);
+                                scene->removeItem(npcw3);
+                                QTimer::singleShot(1000, [=]() {
+                                    ui->dialogi->append("Sam: Dzięki za współpracę! Do zobaczenia!");
+                                    scene->removeItem(npcs1);
+                                });
+
+                                ui->dalej->show();
+                            } else if ((zycieWroga<=0 && npcw2->health>0 && npcw3->health<=0) || (zycieWroga<=0 && npcw3->health>0 && npcw2->health<=0)) {
+                                scene->removeItem(niebieski_smok);
+                                ui->dialogi->append("Pokonałeś Niebieskiego Smoka, ale udało ci się uratować tylko jednego mieszkańca! Dostajesz 300 XP.");
+                                zmienXP(300);
+                                zmienPunktyZycia(200);
+                                smokTimer->stop();
+                                ileZabitych++;
+                                scene->removeItem(npcw3);
+                                scene->removeItem(npcw2);
+                                QTimer::singleShot(1000, [=]() {
+                                    ui->dialogi->append("Sam: Dzięki za współpracę! Do zobaczenia!");
+                                    scene->removeItem(npcs1);
+                                });
+                                ui->dalej->show();
+                            } else if (zycieWroga<=0 && npcw2->health<0 && npcw3->health<0) {
+                                scene->removeItem(niebieski_smok);
+                                ui->dialogi->append("Pokonałeś Niebieskiego Smoka, ale nie udało ci się uratować mieszkańców. Dostajesz 100 XP.");
+                                zmienXP(100);
+                                zmienPunktyZycia(200);
+                                ileZabitych+=2;
+                                QTimer::singleShot(1000, [=]() {
+                                    ui->dialogi->append("Sam: Szkoda, że nie udało się Nam ich uratować...");
+                                    scene->removeItem(npcs1);
+                                });
+                                smokTimer->stop();
+                                ui->dalej->show();
+                            }
+                        });
+                        smokTimer->start(100);
+                    });
                 });
 
+                // opcja 2 - pokonanie samemu
                 connect(ui->opcja2, &QPushButton::clicked, this, [=]() {
+                    ui->dialogi->append("W zamian za bycie odważnym, dostajesz nagrodę!");
                     Bron *dynamit = SpawnBron("Dynamit", 30);
                     PassEquipment(dynamit);
 
@@ -294,12 +377,12 @@ void MainWindow::ThirdScene() {
                     ui->zycie_wroga->show();
 
                     int silaWroga = niebieski_smok->strength;
-                    int silaBroni = wybranyPrzedmiot->getMoc();
 
                     QTimer::singleShot(1000, [=]() {
                         QTimer *smokTimer = new QTimer(this);
                         connect(smokTimer, &QTimer::timeout, this, [=]() {
-                            ruszajSmokiem(niebieski_smok, main_character);
+                            silaBroni = wybranyPrzedmiot->getMoc();
+                            ruszajPostacia(niebieski_smok, main_character);
                             if (main_character->collidesWithItem(niebieski_smok) && zycieWroga>0) {
                                 zmienPunktyZycia(-silaWroga);
                             } else if (npcw2->collidesWithItem(niebieski_smok) && zycieWroga>0) {
@@ -315,6 +398,7 @@ void MainWindow::ThirdScene() {
                                 scene->removeItem(niebieski_smok);
                                 ui->dialogi->append("Pokonałeś Niebieskiego Smoka, a do tego udało ci się uratować mieszkańców! Dostajesz 500 XP.");
                                 zmienXP(500);
+                                zmienPunktyZycia(200);
                                 smokTimer->stop();
                                 scene->removeItem(npcw2);
                                 scene->removeItem(npcw3);
@@ -323,6 +407,7 @@ void MainWindow::ThirdScene() {
                                 scene->removeItem(niebieski_smok);
                                 ui->dialogi->append("Pokonałeś Niebieskiego Smoka, ale udało ci się uratować tylko jednego mieszkańca! Dostajesz 300 XP.");
                                 zmienXP(300);
+                                zmienPunktyZycia(200);
                                 smokTimer->stop();
                                 ileZabitych++;
                                 scene->removeItem(npcw3);
@@ -332,6 +417,7 @@ void MainWindow::ThirdScene() {
                                 scene->removeItem(niebieski_smok);
                                 ui->dialogi->append("Pokonałeś Niebieskiego Smoka, ale nie udało ci się uratować mieszkańców. Dostajesz 100 XP.");
                                 zmienXP(100);
+                                zmienPunktyZycia(200);
                                 ileZabitych+=2;
                                 smokTimer->stop();
                                 ui->dalej->show();
@@ -385,7 +471,6 @@ void MainWindow::showEquipment() {
         }
         ui->ekw_list->show();
     }
-    // Usuń istniejące połączenia
     disconnect(ui->ekw_list, &QListWidget::itemClicked, nullptr, nullptr);
 
     connect(ui->ekw_list, &QListWidget::itemClicked, this, [=](QListWidgetItem *item){
@@ -446,7 +531,7 @@ bool czyMożnaAtakować(int xGracza, int yGracza, int xSmoka, int ySmoka) {
     return (qAbs(xGracza - xSmoka) >= 30 || qAbs(yGracza - ySmoka) >= 30);
 }
 
-void MainWindow::ruszajSmokiem(Character *smok, Character *gracz) {
+void MainWindow::ruszajPostacia(Character *smok, Character *gracz) {
     qreal dx = gracz->x() - smok->x();
     qreal dy = gracz->y() - smok->y();
     qreal dlugosc = sqrt(dx*dx + dy*dy);
@@ -594,16 +679,14 @@ void MainWindow::thirdDialogue() {
 
     QStringList texts = {
                          "Strażak Sam: O, ty z naszych!",
-                         "Ty: Widzę, że trochę się was tu zebrało.",
                          "Sam: Mamy problem. Musimy ugasić kolejnego smoka. Podpalił kolejne miasto.",
                          "Ty: CO? Naprawdę?",
                          "Sam: Jest 300 rannych. Jeśli tak dalej pójdzie, wszyscy zginiemy!",
                          "Sam: Trzymaj się mnie, a na pewno zajdziesz daleko!",
                          };
 
-
     for (int i = 0; i < texts.size(); ++i) {
-        if (i == 5) {
+        if (i == 4) {
             gasnica = SpawnBron("Gaśnica", 25);
             PassEquipment(gasnica);
         }

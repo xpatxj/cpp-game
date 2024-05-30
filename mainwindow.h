@@ -26,7 +26,6 @@ public:
     QVector<Bron*> ekwipunek;
     std::vector<QString> dziennik;
     QKeyEvent *event;
-    void handleItemSelected(const QString& item);
 
 signals:
     void itemSelected(const QString& item);
@@ -39,7 +38,7 @@ public slots:
     void PassEquipment(Bron *przedmiot);
     void showEquipment();
     void showDziennik();
-    void ruszajSmokiem(Character *smok, Character *gracz);
+    void ruszajPostacia(Character *smok, Character *gracz);
 
 private:
     Ui::MainWindow *ui;
@@ -59,6 +58,7 @@ private:
     Bron *wybranyPrzedmiot;
     int ileZabitych;
     int czyWszystkiePostacie;
+    int silaBroni;
 
 private slots:
     void firstScene();
