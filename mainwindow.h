@@ -34,11 +34,13 @@ public slots:
     void firstDialogue();
     void secondDialogue();
     void thirdDialogue();
+    void finalDialogue();
     void changeBackground(const QString& sceneName);
     void PassEquipment(Bron *przedmiot);
     void showEquipment();
     void showDziennik();
     void ruszajPostacia(Character *smok, Character *gracz);
+    void Koniec();
 
 private:
     Ui::MainWindow *ui;
@@ -59,12 +61,20 @@ private:
     int ileZabitych;
     int czyWszystkiePostacie;
     int silaBroni;
+    Character *most;
+    Character *most2;
+    int X_most;
+    int Y_most;
+    int X_most2;
+    int Y_most2;
+    int liczbaDotknietychMostow;
 
 private slots:
     void firstScene();
     void secondScene();
     void ThirdScene();
     void FourthScene();
+    void FourthSceneLoser();
     void FifthScene();
     void zmienPunktyZycia(int punkty);
     void zmienPunktyWroga(int punkty);

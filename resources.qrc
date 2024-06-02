@@ -15,5 +15,10 @@
         <file>images/npc2.png</file>
         <file>images/npc3.png</file>
         <file>images/npcw2.png</file>
+        <file>images/dziennik.png</file>
+        <file>images/kawalek_mostu.png</file>
+        <file>images/red_dragon2.png</file>
+        <file>images/red_dragon3.png</file>
+        <file>images/final_fight.jpg</file>
     </qresource>
 </RCC>

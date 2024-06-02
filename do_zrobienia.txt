@@ -1,12 +1,10 @@
 zapis
 odczyt
 wyjscie z gry
-trzecia scena
 czwarta scena
-piąta scena
 dialog z bossem
-dialog z synem bossa
-dialog z npc
 poprawienie czasu gry
 poglebic troche fabule
 dodanie ze mozna zaczac gre od nowa
+dokonczenie łapania mostow
+dodanie komentarzy

@@ -224,9 +224,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
    <widget class="QListWidget" name="ekw_list">
     <property name="geometry">
      <rect>
-      <x>830</x>
+      <x>740</x>
       <y>100</y>
-      <width>81</width>
+      <width>171</width>
       <height>192</height>
      </rect>
     </property>
@@ -255,7 +255,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <enum>Qt::NoFocus</enum>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-image: url(:/images/images/ekwipunek.png)</string>
+     <string notr="true">background-image: url(:/images/images/dziennik.png)</string>
     </property>
     <property name="text">
      <string/>
