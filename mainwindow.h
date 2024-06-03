@@ -3,7 +3,7 @@
 #include <QGraphicsScene>
 #include "character.h"
 #include "maincharacter.h"
-#include "bron.h"
+#include "Weapon.h"
 
 #include <QMainWindow>
 
@@ -22,27 +22,29 @@ public:
     ~MainWindow();
 
     Character* spawnCharacter(const QString& imagePath, int x, int y, int health, int strength, int speed);
-    Bron* SpawnBron(const QString& nazwa, int moc);
-    QVector<Bron*> ekwipunek;
-    QVector<Bron*> bronieSmoka;
-    std::vector<QString> dziennik;
+    Weapon* SpawnWeapon(const QString& nazwa, int moc);
+    QVector<Weapon*> equi;
+    QVector<Weapon*> dragonWeapons;
+    std::vector<QString> diary;
     QKeyEvent *event;
 
 signals:
     void itemSelected(const QString& item);
 
 public slots:
-    void firstDialogue();
-    void secondDialogue();
-    void thirdDialogue();
-    void finalDialogue();
-    void fourthDialogue();
+    void FirstDialogue();
+    void SecondDialogue();
+    void ThirdDialogue();
+    void FinalDialogue();
+    void FourthDialogue();
+    void WinDialogue();
+    void LoseDialogue();
     void changeBackground(const QString& sceneName);
-    void PassEquipment(Bron *przedmiot);
-    void showEquipment();
-    void showDziennik();
-    void ruszajPostacia(Character *smok, Character *gracz);
-    void Koniec();
+    void PassEquipment(Weapon *przedmiot);
+    void ShowEquipment();
+    void ShowDziennik();
+    void MoveCharacter(Character *smok, Character *gracz);
+    void TheEnd();
 
 private:
     Ui::MainWindow *ui;
@@ -53,33 +55,32 @@ private:
     MainCharacter *main_character;
     int counter;
     QTimer *collisionTimer;
-    bool czyKoliduje;
+    bool ifCollide;
     int xp;
-    int zycie;
-    int zycieWroga;
-    bool czySmok;
-    bool czyMożnaAtakować(int xGracza, int yGracza, int xSmoka, int ySmoka);
-    Bron *wybranyPrzedmiot;
-    int ileZabitych;
-    int czyWszystkiePostacie;
-    int silaBroni;
+    int hp;
+    int enemyHP;
+    bool ifDragon;
+    bool attackPossibility(int xGracza, int yGracza, int xSmoka, int ySmoka);
+    Weapon *chosenItem;
+    int deadBodies;
+    int ifEveryNPC;
+    int weaponPower;
     Character *most;
     Character *most2;
     int X_most;
     int Y_most;
     int X_most2;
     int Y_most2;
-    int liczbaDotknietychMostow;
-    bool dialog;
+    int touchedBridges;
+    bool dialogue;
 
 private slots:
-    void firstScene();
-    void secondScene();
+    void FirstScene();
+    void SecondScene();
     void ThirdScene();
     void FourthScene();
-    void FifthScene();
-    void zmienPunktyZycia(int punkty);
-    void zmienPunktyWroga(int punkty);
-    void zmienXP(int punkty);
+    void ChangeHP(int punkty);
+    void ChangeEnemyHP(int punkty);
+    void ChangeXP(int punkty);
 };
 #endif // MAINWINDOW_H

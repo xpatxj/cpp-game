@@ -1,12 +1,12 @@
-#ifndef BRON_H
-#define BRON_H
+#ifndef WEAPON_H
+#define WEAPON_H
 
 #include <QString>
 
-class Bron
+class Weapon
 {
 public:
-    explicit Bron(const QString& nazwa, int moc);
+    explicit Weapon(const QString& nazwa, int moc);
     QString getNazwa() const;
     int getMoc() const;
 
@@ -15,4 +15,4 @@ private:
     int moc;
 };
 
-#endif // BRON_H
+#endif // WEAPON_H
