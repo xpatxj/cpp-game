@@ -8,3 +8,4 @@ poglebic troche fabule
 dodanie ze mozna zaczac gre od nowa
 dokonczenie łapania mostow
 dodanie komentarzy
+zmienic nazwy zmiennych na polskie

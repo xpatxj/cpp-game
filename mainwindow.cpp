@@ -122,7 +122,6 @@ void MainWindow::secondScene()
 
                 connect(ui->opcja1, &QPushButton::clicked, this, [=]() {
                     ui->opcja1->hide();
-                    // ui->opcja2->hide();
                     ui->dialogi->append("Ten smok nie potrafi mówić.");
 
                 });
@@ -485,9 +484,6 @@ void MainWindow::ThirdScene() {
     timer_wrog->start(100);
 }
 
-// z żółtym deszczem, mozemy tutaj uzyc parasolki i on bedzie calkiem trudny, ale nie najtrudniejszy, okaze sie dzieckiem bossa.
-// dostaniemy bron dzieki ktorej bedziemy mogli sie skopiowac trzy razy i te nasze male wersje rowniez beda mogly nam pomagac.
-// musi zebrac wszystkie 3 kawalki mostu do tej pory, aby tutaj w ogole dotrzec
 void MainWindow::FourthScene() {
     disconnect(ui->dalej, &QPushButton::clicked, this, &MainWindow::FourthScene);
     disconnect(ui->opcja1, &QPushButton::clicked, this, nullptr);
@@ -502,11 +498,88 @@ void MainWindow::FourthScene() {
     scene->removeItem(main_character);
     scene->addItem(main_character);
 
-    if (liczbaDotknietychMostow == 3) {
-        ui->dialogi->append("CHUJ CI W DUPE");
-        main_character->setFlag(QGraphicsItem::ItemIsFocusable);
-        main_character->setFocus();
-    } else if (liczbaDotknietychMostow != 3) {
+    if (liczbaDotknietychMostow >= 3) {
+        ui->dialogi->append("Od tej pory możesz używać parasola, chroni cię on przed atakami.");
+        main_character->setPos(10, 270);
+        // main_character->setFlag(QGraphicsItem::ItemIsFocusable);
+        // main_character->setFocus();
+        Character *wladca_zaru = spawnCharacter(":/images/images/wladca_zaru.png", 420, 150, 2500, 0, 0);
+        wladca_zaru->hide();
+
+        QVector<Bron*> bronieSmoka = {
+            new Bron("Ognisty oddech", 50),
+            new Bron("Zółty deszcz", 100),
+            new Bron("Mroczny pocisk", 150),
+            new Bron("Błyskawica", 200),
+            new Bron("Kamienne uderzenie", 500)
+        };
+
+        dialog = true;
+        // QTimer *bossTimer = new QTimer(this);
+        // connect(bossTimer, &QTimer::timeout, this, [=]() {
+            if (dialog == true) {
+                fourthDialogue();
+                dialog = false;
+            }
+
+            QTimer::singleShot(600, [=]() {
+                wladca_zaru->show();
+                ui->zycie_wroga->show();
+            });
+            QTimer::singleShot(800, [=]() {
+
+                QTimer *atakWroga = new QTimer(this);
+                connect(atakWroga, &QTimer::timeout, this, [=]() {
+                    silaBroni = wybranyPrzedmiot->getMoc();
+
+                    int randomIndex = rand() % bronieSmoka.size();
+                    Bron *wybranaBron = bronieSmoka[randomIndex];
+                    ui->dialogi->append("Smok używa " + wybranaBron->getNazwa() + "!");
+                    ui->dialogi->append(QString::number(randomIndex));
+
+                    if (wybranyPrzedmiot->getNazwa() != "Parasol") {
+                        ui->dialogi->append("Smok zaatakował cię " + wybranaBron->getNazwa() + ". Tracisz " + QString::number(wybranaBron->getMoc()) + " punktów życia.");
+                        zmienPunktyZycia(-wybranaBron->getMoc());
+                        if (wybranaBron->getNazwa() == "Kamienne uderzenie") {
+                            ui->dialogi->append("Dostałeś bronią ostateczną!");
+                        }
+                    } else if (wybranyPrzedmiot->getNazwa() == "Parasol") {
+                        ui->dialogi->append("Używasz Parasola, jesteś chroniony.");
+                        main_character->setPixmap(QPixmap(":/images/images/postac_z_parasolem.png"));
+                    } else if (main_character->getCzyAtak()) {
+                        zmienPunktyWroga(-silaBroni);
+                        main_character->setCzyAtak(false);
+                    } else if (zycie <= 0) {
+                        Koniec();
+                    } else if (wladca_zaru->health <= 0 && ileZabitych < 3) {
+                        wladca_zaru->hide();
+                        scene->removeItem(wladca_zaru);
+                        DialogWygranaGry();
+                    } else if (wladca_zaru->health <= 0 || ileZabitych >= 3) {
+                        DialogPrzegranaGry();
+                        wladca_zaru->hide();
+                        scene->removeItem(wladca_zaru);
+                    }
+
+                });
+                atakWroga->start(3000);
+
+
+                //Sprawdzanie warunków wygranej lub przegranej
+                // if (wladca_zaru->health <= 0 && ileZabitych == 3) {
+                //     wladca_zaru->hide();
+                //     scene->removeItem(wladca_zaru);
+                //     DialogWygranaGry();
+                // } else if (wladca_zaru->health <= 0 || ileZabitych < 3) {
+                //     DialogPrzegranaGry();
+                //     wladca_zaru->hide();
+                //     scene->removeItem(wladca_zaru);
+                // }
+            });
+        // });
+        // bossTimer->start(100);
+
+    } else {
         ui->zycie->hide();
         ui->xp->hide();
 
@@ -515,18 +588,6 @@ void MainWindow::FourthScene() {
     }
 }
 
-void MainWindow::FourthSceneLoser() {
-    disconnect(ui->start, &QPushButton::clicked, this, &MainWindow::FourthScene);
-    changeBackground("wioska");
-
-    ui->start->hide();
-    ui->dialogi->show();
-    ui->zycie->show();
-    ui->xp->show();
-
-    main_character->setPos(0, 340);
-
-}
 // final fight, jestesmy tylko my i boss. on moze rzucac w nas jednym z 5 broni, ktore zainicjujemy w tablicy. ma bardzo duzo zycia,
 // ale my tez mamy duzo, bo zrobi nam sie x5 podczas walki z nim. on ogolnie sie nie rusza, po prostu randomowo nas atakuje.
 // gdy go pokonamy, okaze sie, ze jest to stachnik xd i go "odczarujemy",
@@ -542,10 +603,6 @@ void MainWindow::PassEquipment(Bron *przedmiot) {
     QString nazwa = przedmiot->getNazwa();
     ui->dialogi->append("Zdobyłeś: " + nazwa.toUpper() + ". Zobacz swój ekwipunek");
 }
-
-// void MainWindow::uzycieParasola() {
-//     character->setPixmap(QPixmap(imagePath));
-// }
 
 void MainWindow::showEquipment() {
     if(ui->ekw_list->isVisible()) {
@@ -659,6 +716,7 @@ void MainWindow::Koniec() {
     ui->ekw_list->hide();
     ui->dziennik->hide();
     ui->zycie->hide();
+    ui->zycie_wroga->hide();
     ui->dalej->hide();
     ui->xp->hide();
     ui->opcja1->hide();
@@ -741,7 +799,6 @@ void MainWindow::firstDialogue() {
 
 void MainWindow::secondDialogue() {
 
-
     QStringList texts = {
         "Wieśniaczka: Nareszcie jesteś!",
         "Ty: Kim jesteś? Nic ci nie jest?",
@@ -811,6 +868,24 @@ void MainWindow::finalDialogue() {
             if (i == 6) {
                 ui->dalej->show();
             }
+        });
+    }
+}
+
+void MainWindow::fourthDialogue() {
+    QStringList texts = {
+         "Smok: Witaj, mały bohaterze. Widzę, że przyszedłeś, aby stawić mi czoła.",
+         "Gracz: Tak, Smoku. Muszę Cię powstrzymać, zanim zranisz więcej ludzi.",
+         "Smok: Ach, ci ludzie... Nie rozumieją, że ja również muszę przetrwać. Ale skoro przyszedłeś, przygotuj się na walkę.",
+         "Gracz: Nie mam zamiaru cię oszczędzać. Muszę uratować moje miasto.",
+         "Smok: Odważne słowa, mały. Zobaczymy, czy masz na tyle odwagi, aby zmierzyć się ze mną."
+    };
+
+    for (int i = 0; i < texts.size(); ++i) {
+        QTimer::singleShot(100 * (i + 1), this, [=]() {
+            counter++;
+            ui->dialogi->append(texts[i]);
+
         });
     }
 }

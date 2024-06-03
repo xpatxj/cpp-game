@@ -24,6 +24,7 @@ public:
     Character* spawnCharacter(const QString& imagePath, int x, int y, int health, int strength, int speed);
     Bron* SpawnBron(const QString& nazwa, int moc);
     QVector<Bron*> ekwipunek;
+    QVector<Bron*> bronieSmoka;
     std::vector<QString> dziennik;
     QKeyEvent *event;
 
@@ -35,6 +36,7 @@ public slots:
     void secondDialogue();
     void thirdDialogue();
     void finalDialogue();
+    void fourthDialogue();
     void changeBackground(const QString& sceneName);
     void PassEquipment(Bron *przedmiot);
     void showEquipment();
@@ -68,13 +70,13 @@ private:
     int X_most2;
     int Y_most2;
     int liczbaDotknietychMostow;
+    bool dialog;
 
 private slots:
     void firstScene();
     void secondScene();
     void ThirdScene();
     void FourthScene();
-    void FourthSceneLoser();
     void FifthScene();
     void zmienPunktyZycia(int punkty);
     void zmienPunktyWroga(int punkty);
