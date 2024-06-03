@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->start, &QPushButton::clicked, this, &MainWindow::FirstScene);
     connect(ui->ekw_but, &QPushButton::clicked, this, &MainWindow::ShowEquipment);
-    connect(ui->dziennik, &QPushButton::clicked, this, &MainWindow::ShowDziennik);
+    connect(ui->dziennik, &QPushButton::clicked, this, &MainWindow::ShowDiary);
 
     counter = 1;
 }
@@ -635,7 +635,7 @@ void MainWindow::ShowEquipment() {
     });
 }
 
-void MainWindow::ShowDziennik() {
+void MainWindow::ShowDiary() {
     if(ui->dzien_list->isVisible()) {
         ui->dzien_list->hide();
     } else {
@@ -820,6 +820,7 @@ void MainWindow::SecondDialogue() {
             if (i == 6) {
                 parasol = SpawnWeapon("Parasol", 0);
                 PassEquipment(parasol);
+                diary.push_back("Parasol będzie ci potrzebny podczas walki z bossem.");
             }
         });
     }

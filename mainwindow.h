@@ -42,7 +42,7 @@ public slots:
     void changeBackground(const QString& sceneName);
     void PassEquipment(Weapon *przedmiot);
     void ShowEquipment();
-    void ShowDziennik();
+    void ShowDiary();
     void MoveCharacter(Character *smok, Character *gracz);
     void TheEnd();
 
