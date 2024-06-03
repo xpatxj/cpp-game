@@ -363,6 +363,9 @@ void MainWindow::ThirdScene() {
                                 });
 
                                 ui->dalej->show();
+                            } else if (xp>= 400){
+                                ui->dialogi->append("Zyskujesz nową broń! Potężny HYDRANT!");
+                                PassEquipment(SpawnBron("HYDRANT POTĘŻNY", 70));
                             } else if ((zycieWroga<=0 && npcw2->health>0 && npcw3->health<=0) || (zycieWroga<=0 && npcw3->health>0 && npcw2->health<=0)) {
                                 scene->removeItem(niebieski_smok);
                                 ui->dialogi->append("Pokonałeś Niebieskiego Smoka, ale udało ci się uratować tylko jednego mieszkańca! Dostajesz 300 XP.");
@@ -451,7 +454,10 @@ void MainWindow::ThirdScene() {
                                 scene->removeItem(npcw2);
                                 scene->removeItem(npcw3);
                                 ui->dalej->show();
-                            } else if ((zycieWroga<=0 && npcw2->health>0 && npcw3->health<=0) || (zycieWroga<=0 && npcw3->health>0 && npcw2->health<=0)) {
+                            } else if (xp>= 400){
+                                ui->dialogi->append("Zyskujesz nową broń! Potężny HYDRANT!");
+                                PassEquipment(SpawnBron("HYDRANT POTĘŻNY", 70));
+                            }else if ((zycieWroga<=0 && npcw2->health>0 && npcw3->health<=0) || (zycieWroga<=0 && npcw3->health>0 && npcw2->health<=0)) {
                                 scene->removeItem(niebieski_smok);
                                 ui->dialogi->append("Pokonałeś Niebieskiego Smoka, ale udało ci się uratować tylko jednego mieszkańca! Dostajesz 300 XP.");
                                 zmienXP(300);
@@ -501,8 +507,8 @@ void MainWindow::FourthScene() {
     if (liczbaDotknietychMostow >= 3) {
         ui->dialogi->append("Od tej pory możesz używać parasola, chroni cię on przed atakami.");
         main_character->setPos(10, 270);
-        // main_character->setFlag(QGraphicsItem::ItemIsFocusable);
-        // main_character->setFocus();
+        main_character->setFlag(QGraphicsItem::ItemIsFocusable);
+        main_character->setFocus();
         Character *wladca_zaru = spawnCharacter(":/images/images/wladca_zaru.png", 420, 150, 2500, 0, 0);
         wladca_zaru->hide();
 
@@ -510,8 +516,8 @@ void MainWindow::FourthScene() {
             new Bron("Ognisty oddech", 50),
             new Bron("Zółty deszcz", 100),
             new Bron("Mroczny pocisk", 150),
-            new Bron("Błyskawica", 200),
-            new Bron("Kamienne uderzenie", 500)
+            new Bron("Błyskawica", 150),
+            new Bron("Kamienne uderzenie", 300)
         };
 
         dialog = true;
@@ -522,12 +528,14 @@ void MainWindow::FourthScene() {
                 dialog = false;
             }
 
+            zycieWroga = 0;
+            zmienPunktyWroga(wladca_zaru->health);
+
             QTimer::singleShot(600, [=]() {
                 wladca_zaru->show();
                 ui->zycie_wroga->show();
             });
             QTimer::singleShot(800, [=]() {
-
                 QTimer *atakWroga = new QTimer(this);
                 connect(atakWroga, &QTimer::timeout, this, [=]() {
                     silaBroni = wybranyPrzedmiot->getMoc();
@@ -535,9 +543,18 @@ void MainWindow::FourthScene() {
                     int randomIndex = rand() % bronieSmoka.size();
                     Bron *wybranaBron = bronieSmoka[randomIndex];
                     ui->dialogi->append("Smok używa " + wybranaBron->getNazwa() + "!");
-                    ui->dialogi->append(QString::number(randomIndex));
+                    // ui->dialogi->append(QString::number(randomIndex));
 
+                    QTimer *atakNasz = new QTimer(this);
+                    connect(atakNasz, &QTimer::timeout, this, [=]() {
+                        if (main_character->getCzyAtak()) {
+                            zmienPunktyWroga(-silaBroni);
+                            main_character->setCzyAtak(false);
+                        }
+                    });
+                    atakNasz->start(800);
                     if (wybranyPrzedmiot->getNazwa() != "Parasol") {
+                        main_character->setPixmap(QPixmap(":/images/images/postac.png"));
                         ui->dialogi->append("Smok zaatakował cię " + wybranaBron->getNazwa() + ". Tracisz " + QString::number(wybranaBron->getMoc()) + " punktów życia.");
                         zmienPunktyZycia(-wybranaBron->getMoc());
                         if (wybranaBron->getNazwa() == "Kamienne uderzenie") {
@@ -546,35 +563,26 @@ void MainWindow::FourthScene() {
                     } else if (wybranyPrzedmiot->getNazwa() == "Parasol") {
                         ui->dialogi->append("Używasz Parasola, jesteś chroniony.");
                         main_character->setPixmap(QPixmap(":/images/images/postac_z_parasolem.png"));
-                    } else if (main_character->getCzyAtak()) {
+                    } /*else if (main_character->getCzyAtak()) {
                         zmienPunktyWroga(-silaBroni);
                         main_character->setCzyAtak(false);
-                    } else if (zycie <= 0) {
+                    }*/ else if (zycie <= 0) {
                         Koniec();
                     } else if (wladca_zaru->health <= 0 && ileZabitych < 3) {
                         wladca_zaru->hide();
                         scene->removeItem(wladca_zaru);
-                        DialogWygranaGry();
+                        // DialogWygranaGry();
+                        ui->dialogi->append("WYGRANA");
                     } else if (wladca_zaru->health <= 0 || ileZabitych >= 3) {
-                        DialogPrzegranaGry();
+                        // DialogPrzegranaGry();
                         wladca_zaru->hide();
                         scene->removeItem(wladca_zaru);
+                        ui->dialogi->append("PRZEGRANA");
                     }
 
                 });
                 atakWroga->start(3000);
 
-
-                //Sprawdzanie warunków wygranej lub przegranej
-                // if (wladca_zaru->health <= 0 && ileZabitych == 3) {
-                //     wladca_zaru->hide();
-                //     scene->removeItem(wladca_zaru);
-                //     DialogWygranaGry();
-                // } else if (wladca_zaru->health <= 0 || ileZabitych < 3) {
-                //     DialogPrzegranaGry();
-                //     wladca_zaru->hide();
-                //     scene->removeItem(wladca_zaru);
-                // }
             });
         // });
         // bossTimer->start(100);
@@ -628,6 +636,8 @@ void MainWindow::showEquipment() {
                 // ui->dialogi->append("Moc: " + QString::number(przedmiot->getMoc()));
 
                 wybranyPrzedmiot = przedmiot;
+                main_character->setFlag(QGraphicsItem::ItemIsFocusable);
+                main_character->setFocus();
                 break;
             }
         }
@@ -849,7 +859,6 @@ void MainWindow::thirdDialogue() {
 }
 
 void MainWindow::finalDialogue() {
-    Bron *parasol = nullptr;
 
     QStringList texts = {
         "Niestety, nie udało Ci się zebrać całego mostu!",
