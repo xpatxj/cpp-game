@@ -11,21 +11,15 @@ CONFIG += c++17
 SOURCES += \
     Weapon.cpp \
     character.cpp \
-    game.cpp \
     main.cpp \
     maincharacter.cpp \
-    mainwindow.cpp \
-    npc.cpp \
-    smok.cpp
+    mainwindow.cpp
 
 HEADERS += \
     Weapon.h \
     character.h \
-    game.h \
     maincharacter.h \
-    mainwindow.h \
-    npc.h \
-    smok.h
+    mainwindow.h
 
 FORMS += \
     mainwindow.ui \

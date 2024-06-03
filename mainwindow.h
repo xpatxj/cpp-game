@@ -45,6 +45,7 @@ public slots:
     void ShowDiary();
     void MoveCharacter(Character *smok, Character *gracz);
     void TheEnd();
+    // void exitGame();
 
 private:
     Ui::MainWindow *ui;
@@ -82,5 +83,6 @@ private slots:
     void ChangeHP(int punkty);
     void ChangeEnemyHP(int punkty);
     void ChangeXP(int punkty);
+    void on_exitGame_2_triggered();
 };
 #endif // MAINWINDOW_H

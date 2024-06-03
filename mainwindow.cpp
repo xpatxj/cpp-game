@@ -44,6 +44,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->start, &QPushButton::clicked, this, &MainWindow::FirstScene);
     connect(ui->ekw_but, &QPushButton::clicked, this, &MainWindow::ShowEquipment);
     connect(ui->dziennik, &QPushButton::clicked, this, &MainWindow::ShowDiary);
+    // QObject::connect(ui->menuWyjdz, &QAction::triggered, this, &MainWindow::exitGame);
+    // connect(ui->exitGame_2, &QAction::triggered, this, &MainWindow::exitGame);
+
 
     counter = 1;
 }
@@ -961,3 +964,10 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::on_exitGame_2_triggered()
+{
+    QApplication::quit();
+    scene->clear();
+}
+

@@ -325,26 +325,22 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <height>25</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuZapisz">
+   <widget class="QMenu" name="exitGame">
     <property name="title">
-     <string>Zapisz</string>
+     <string>Wyjście</string>
     </property>
    </widget>
-   <widget class="QMenu" name="menuOdczytaj">
-    <property name="title">
-     <string>Odczytaj</string>
-    </property>
-   </widget>
-   <widget class="QMenu" name="menuWyjd">
-    <property name="title">
-     <string>Wyjdź</string>
-    </property>
-   </widget>
-   <addaction name="menuZapisz"/>
-   <addaction name="menuOdczytaj"/>
-   <addaction name="menuWyjd"/>
+   <addaction name="exitGame"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="exitGame_2">
+   <property name="text">
+    <string>exitGame</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::QuitRole</enum>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>tlo</tabstop>
