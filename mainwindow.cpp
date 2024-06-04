@@ -588,6 +588,7 @@ void MainWindow::FourthScene() {
                     ui->dziennik->hide();
                     ui->dialogi->clear();
                     WinDialogue();
+                    atakWroga->stop();
                 } else if (wladca_zaru->health <= 0 || deadBodies >= 3) {
                     wladca_zaru->hide();
                     scene->removeItem(wladca_zaru);
@@ -597,6 +598,8 @@ void MainWindow::FourthScene() {
                     ui->dziennik->hide();
                     ui->dialogi->clear();
                     LoseDialogue();
+                    atakWroga->stop();
+
                 }
             });
             atakWroga->start(2500);
@@ -968,6 +971,5 @@ MainWindow::~MainWindow()
 void MainWindow::on_exitGame_2_triggered()
 {
     QApplication::quit();
-    scene->clear();
 }
 
